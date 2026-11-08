@@ -1,0 +1,19 @@
+# Peticiones de prueba. En VS Code con la extensión REST Client, o en Rider/Visual Studio: clic en "Send Request".
+# Con el stack arriba (docker compose up), la web reenvía /api/ a la API.
+@base = http://127.0.0.1:8080
+
+### Viva
+GET {{base}}/api/health
+
+### Lista: también llega a PostgreSQL
+GET {{base}}/api/health/ready
+
+### RF-PAC-01: dar de alta un paciente (por implementar: hoy responde 501)
+POST {{base}}/api/pacientes
+Content-Type: application/json
+
+{
+}
+
+### RF-HIS-03: ver el historial de un paciente (por implementar)
+GET {{base}}/api/pacientes/1/historial
