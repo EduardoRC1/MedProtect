@@ -1,0 +1,99 @@
+# PLANTILLA de la sesión 4 (práctica 2). Desde aquí NO corre: GitHub solo ejecuta lo que está en
+# .github/workflows/. En la práctica la copian a .github/workflows/seguridad.yml y llenan cada job con
+# el paso de la diapositiva que le toca.
+#
+#   Conduce: {RESPONSABLE_SEGURIDAD}. Revisa: {TECH_LEAD}.
+#
+# Mientras un job diga "Por implementar" sale en ROJO a propósito: un control sin construir no puede
+# pasar por verde. Los cuatro nombres (secretos, dependencias, sast, sbom) son los checks requeridos
+# del hito H3: no los cambien.
+#
+# Lo que ya trae y no se quita:
+#   - runs-on: ubuntu-24.04 en todos los jobs. El repositorio es público: nada de self-hosted.
+#   - permissions: contents: read arriba. Un job pide de más solo si lo necesita, y lo dice en un comentario.
+#   - Acciones fijadas por SHA completo, con la versión en un comentario.
+#   - persist-credentials: false en cada checkout.
+#   - Nunca pull_request_target.
+#   - Lo que escribe el usuario (título del PR, nombre de la rama) entra por env:, nunca dentro de run.
+#   - Ningún job requerido lleva if: un check en "skipped" cuenta como aprobado.
+#
+# Diferencias de MedProtect con el proyecto de la clase (la diapositiva asume src/Startup.Api):
+#   - La solución es webapi/MedProtect.slnx y el proyecto, webapi/MedProtect.Api/.
+#   - Los pasos de dotnet van con working-directory: webapi. Ahí está el global.json, y dotnet lo busca
+#     desde la carpeta donde corre, no desde el proyecto.
+#   - Directory.Build.props va en webapi/, no en la raíz: el Dockerfile construye con webapi/ como
+#     contexto y no vería uno de la raíz. El packages.lock.json queda en webapi/MedProtect.Api/.
+#   - Para el SBOM, comprueben que la guarda encuentra paquetes pkg:nuget/: sin archivo de bloqueo sale vacío.
+name: seguridad
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: seguridad-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Paso 2. gitleaks recorre TODA la historia, no solo el árbol: por eso fetch-depth: 0.
+  # Versión y suma: de la página de releases de gitleaks, verificadas con sha256sum --check.
+  secretos:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Por implementar, gitleaks con suma verificada
+        run: |
+          echo "::error::Falta el control de secretos: paso 2 de la sesión 4."
+          exit 1
+
+  # Paso 3. Restaurar con --locked-mode y la auditoría de NuGet como error.
+  # Ojo: dotnet list package --vulnerable sale con 0 aunque encuentre fallas; la guarda la pone jq.
+  dependencias:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Por implementar, auditoría de dependencias
+        run: |
+          echo "::error::Falta el control de dependencias: paso 3 de la sesión 4."
+          exit 1
+
+  # Paso 4. CodeQL para C#, sin compilar (build-mode: none), suite security-extended.
+  # Este job necesitará security-events: write para publicar en la pestaña Security: pídanlo aquí,
+  # en el job, con un comentario de por qué, no arriba para todos.
+  sast:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Por implementar, CodeQL con guarda
+        run: |
+          echo "::error::Falta el SAST: paso 4 de la sesión 4."
+          exit 1
+
+  # Paso 5. Syft por digest, salida CycloneDX, y una guarda que exige paquetes pkg:nuget/.
+  # El SBOM se sube como artefacto de la corrida.
+  sbom:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Por implementar, SBOM con guarda
+        run: |
+          echo "::error::Falta el SBOM: paso 5 de la sesión 4."
+          exit 1

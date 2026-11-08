@@ -47,6 +47,8 @@ curl http://127.0.0.1:8080/api/health/ready
 
 Para borrar todo, incluidos los datos: `docker compose down -v`.
 
+Las tres imágenes base se descargan sin cuenta: no hace falta `docker login` (comprobado el 2026-11-08 con una configuración de Docker vacía). El CI hace lo mismo que estos comandos en cada pull request, en runners de GitHub: `.github/workflows/ci.yml`.
+
 ## Lo que ya viene decidido
 
 Lo fijó el instructor al iniciar el repositorio. **No cuenta como ADR del equipo.**
@@ -67,6 +69,6 @@ Lo fijó el instructor al iniciar el repositorio. **No cuenta como ADR del equip
 |---|---|---|
 | 2 | Modelo de amenazas, ADR, VM endurecida | `docs/seguridad/`, `docs/adr/` |
 | 3 | Las rutas del SRS: alta, consulta e historial, con autenticación, roles y validación | `webapi/`, `db/init/`, `docs/srs/` |
-| 4 | Base con rol mínimo, respaldos y despliegue con el usuario `deploy` | `compose.yaml`, `db/` |
+| 4 | Base con rol mínimo, respaldos, controles de `seguridad.yml` y runner en el repositorio privado | `compose.yaml`, `db/`, `.github/`, `docs/despliegue/` |
 | 5 | Bitácoras, monitoreo y respuesta a incidentes | `docs/seguridad/` |
 | 6 | Pentest cruzado y defensa | `docs/seguridad/` |

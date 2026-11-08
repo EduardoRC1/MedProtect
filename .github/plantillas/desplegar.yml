@@ -1,0 +1,57 @@
+# PLANTILLA para el repositorio PRIVADO de despliegue, no para este. Aquí no corre: no está en
+# .github/workflows/, y aunque lo estuviera, en este repositorio no hay runner que lo tome.
+#
+# En el repositorio privado se copia a .github/workflows/desplegar.yml. La guía completa, con la
+# instalación del runner y cómo verlo fallar: docs/despliegue/runner-autohospedado.md.
+#
+#   Conduce: {DEVOPS}. Verifica: {RESPONSABLE_SEGURIDAD}.
+#
+# Por qué así:
+#   - workflow_dispatch y nada más: solo lo dispara a mano alguien con permiso de escritura en el
+#     privado. Nunca pull_request ni push de otro repositorio: el runner de la VM no corre código ajeno.
+#   - runs-on pide las TRES etiquetas. Si se escribe mal, el job no falla: se queda esperando runner
+#     hasta 24 horas. Declaren la etiqueta en .github/actionlint.yaml y pasen actionlint.
+#   - concurrency sin cancelar: dos despliegues a la vez se pisan, y uno a medias no se corta.
+name: desplegar
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: despliegue
+  cancel-in-progress: false
+
+jobs:
+  comprobar:
+    runs-on: [self-hosted, linux, vm-equipo]
+    timeout-minutes: 5
+    steps:
+      - name: Quién soy y dónde corro
+        run: |
+          whoami
+          hostname
+          id -nG
+
+      # Si alguien le da sudo a deploy, este job sale en rojo. Se ve fallar agregando deploy al grupo
+      # sudo (y reiniciando el servicio), y se regresa quitándolo.
+      - name: Fallar si el runner tiene sudo
+        run: |
+          if id -nG | grep -qw sudo; then
+            echo "::error::El usuario del runner está en el grupo sudo. Debe ser deploy, sin sudo."
+            exit 1
+          fi
+          echo "ok   $(whoami) sin sudo"
+
+  # Sesión 5: aquí va el despliegue de verdad, después de comprobar. Lo deciden con un ADR: qué imagen
+  # se levanta, desde qué commit de main y con qué usuario. Si el runner va a usar Docker, deploy entra
+  # al grupo docker, y ese grupo equivale a root en la VM.
+  # desplegar:
+  #   needs: comprobar
+  #   runs-on: [self-hosted, linux, vm-equipo]
+  #   timeout-minutes: 15
+  #   steps:
+  #     - name: {PASO_DE_DESPLIEGUE}
+  #       run: {COMANDO}
