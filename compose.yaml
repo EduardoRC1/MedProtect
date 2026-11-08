@@ -10,18 +10,22 @@
 name: medprotect
 
 services:
-  # PostgreSQL 17 endurecido de Docker (Docker Hardened Images): sin root, firmado y con lo mínimo.
-  # No es distroless como la API y la web: el arranque de PostgreSQL necesita un shell para crear la base.
-  # Ver docs/arquitectura/README.md.
+  # PostgreSQL 17, imagen oficial en Alpine. No es distroless como la API y la web: el arranque de
+  # PostgreSQL necesita un shell para crear la base. Ver docs/arquitectura/README.md.
   db:
-    image: dhi.io/postgres:17
+    image: postgres:17-alpine
+    # Sola, la imagen arranca como root y después baja a postgres. Con user: nunca es root: corre
+    # directo como postgres (uid 70 en Alpine), y por eso cap_drop: ALL no le estorba.
+    user: "70:70"
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:?falta POSTGRES_DB en .env}
       POSTGRES_USER: ${POSTGRES_USER:?falta POSTGRES_USER en .env}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?falta POSTGRES_PASSWORD en .env}
     volumes:
-      - datos-db:/var/lib/postgresql
+      # En PostgreSQL 17 los datos viven en /var/lib/postgresql/data. Montado un nivel arriba, Docker crea
+      # además un volumen anónimo ahí, y los datos no quedarían en datos-db.
+      - datos-db:/var/lib/postgresql/data
       # Corre solo la primera vez, con el volumen vacío. Para repetirlo: docker compose down -v (borra los datos).
       - ./db/init:/docker-entrypoint-initdb.d:ro
     networks:
