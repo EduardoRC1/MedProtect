@@ -1,0 +1,126 @@
+# CI de MedProtect: construye las tres imágenes, levanta el stack completo y lo prueba por fuera,
+# como lo usaría una persona. Corre en cada pull request a main y en cada push a main.
+#
+# Corre en runners de GitHub. El repositorio es público: aquí NO va ningún runner autohospedado
+# (runs-on: self-hosted). El runner de la VM vive en el repositorio privado de despliegue; ver
+# docs/despliegue/runner-autohospedado.md.
+#
+# Los controles de seguridad (gitleaks, dependencias, CodeQL y SBOM) son otro workflow, seguridad.yml,
+# que arma el equipo en la sesión 4. Su punto de partida está en .github/plantillas/seguridad.yml.
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Lo mínimo: leer el código. Ningún job de este archivo necesita escribir.
+permissions:
+  contents: read
+
+# Cinco empujones a un pull request son una sola corrida: la última.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stack:
+    name: stack completo
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Un .env de prueba con una contraseña al azar: nunca se versiona ni sale de esta máquina.
+      - name: Generar un .env de prueba
+        run: |
+          cp .env.example .env
+          sed -i "s/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=$(openssl rand -hex 16)/" .env
+
+      - name: Construir y levantar
+        run: docker compose up -d --build --wait --wait-timeout 180
+
+      - name: Probar las rutas a través de la web
+        run: |
+          falla=0
+          revisar() {
+            # || true: sin eso, una conexión rechazada corta el paso antes de decir qué ruta falló.
+            obtenido=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 -X "$1" "http://127.0.0.1:8080$2" || true)
+            if [ "$obtenido" = "$3" ]; then
+              echo "ok   $1 $2 da $3"
+            else
+              echo "::error::$1 $2 respondió $obtenido; se esperaba $3"
+              falla=1
+            fi
+          }
+          revisar GET  /                  200
+          revisar GET  /api/health        200
+          revisar GET  /api/health/ready  200
+          # Las rutas del SRS responden 501 hasta que el equipo las construya. Cuando una ya exista,
+          # cambien aquí el código esperado por el real.
+          revisar POST /api/pacientes     501
+          exit $falla
+
+      - name: Las cabeceras de seguridad salen
+        run: |
+          cabeceras=$(curl -s -D - -o /dev/null http://127.0.0.1:8080/)
+          falla=0
+          for c in Content-Security-Policy X-Content-Type-Options X-Frame-Options Referrer-Policy; do
+            if grep -qi "^$c:" <<< "$cabeceras"; then echo "ok   $c"; else echo "::error::falta $c"; falla=1; fi
+          done
+          exit $falla
+
+      # La API y la web son distroless: si alguien entra, no hay shell con qué moverse.
+      # Este paso pasa cuando el shell NO existe.
+      - name: Ver fallar a propósito, sin shell en api ni en web
+        run: |
+          falla=0
+          for s in api web; do
+            if docker compose exec -T "$s" sh -c true 2>/dev/null; then
+              echo "::error::$s tiene shell"
+              falla=1
+            else
+              echo "ok   $s sin shell"
+            fi
+          done
+          exit $falla
+
+      - name: Ningún contenedor corre como root
+        run: |
+          falla=0
+          for s in db api web; do
+            id=$(docker compose ps -q "$s")
+            usuario=$(docker inspect --format '{{.Config.User}}' "$id")
+            if [ -z "$usuario" ] || [ "$usuario" = "root" ] || [ "$usuario" = "0" ]; then
+              echo "::error::$s corre como root (Config.User='$usuario')"
+              falla=1
+            else
+              echo "ok   $s corre como '$usuario'"
+            fi
+          done
+          exit $falla
+
+      # Con la base apagada, ready tiene que decirlo: 503, no 200.
+      - name: Ver fallar a propósito, sin base ready da 503
+        run: |
+          docker compose stop db
+          obtenido=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 http://127.0.0.1:8080/api/health/ready || true)
+          if [ "$obtenido" = "503" ]; then
+            echo "ok   sin base, /api/health/ready da 503"
+          else
+            echo "::error::sin base, /api/health/ready respondió $obtenido; se esperaba 503"
+            exit 1
+          fi
+
+      - name: Bitácoras, si algo falló
+        if: failure()
+        run: |
+          docker compose ps -a
+          docker compose logs --no-color --tail 200
+
+      - name: Bajar y borrar los datos de prueba
+        if: always()
+        run: docker compose down -v
