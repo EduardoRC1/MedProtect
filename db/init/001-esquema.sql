@@ -1,0 +1,28 @@
+-- Esquema de MedProtect. Lo diseña el equipo a partir del SRS (docs/srs/SRS.md).
+--
+-- PostgreSQL corre los archivos de esta carpeta UNA sola vez, en orden de nombre, cuando el volumen de la
+-- base está vacío. Para volver a correrlos: docker compose down -v (borra todos los datos) y up otra vez.
+--
+-- Reglas del proyecto:
+--   - Solo datos ficticios.
+--   - Fechas en UTC (timestamptz) y con quién hizo cada cambio.
+--   - La API nunca arma SQL concatenando texto: siempre parámetros.
+--
+-- Punto de partida, para que lo ajusten (descomenten y llenen las variables):
+--
+-- CREATE TABLE paciente (
+--     id            uuid        PRIMARY KEY,
+--     {CAMPOS_DEL_ALTA},
+--     creado_utc    timestamptz NOT NULL DEFAULT now(),
+--     creado_por    text        NOT NULL
+-- );
+--
+-- CREATE TABLE entrada_historial (
+--     id            uuid        PRIMARY KEY,
+--     paciente_id   uuid        NOT NULL REFERENCES paciente (id),
+--     {CAMPOS_DE_LA_ENTRADA},
+--     escrita_utc   timestamptz NOT NULL DEFAULT now(),
+--     escrita_por   text        NOT NULL
+-- );
+--
+-- CREATE INDEX ix_entrada_historial_paciente ON entrada_historial (paciente_id, escrita_utc);

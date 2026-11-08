@@ -1,0 +1,97 @@
+# MedProtect: levanta todo el stack, en su laptop o en la VM.
+#
+#   cp .env.example .env        # y cambien la contraseña: .env no se versiona
+#   docker compose up -d --build
+#   curl http://127.0.0.1:8080/api/health/ready
+#
+# Solo la web publica un puerto, y solo en 127.0.0.1. La API y la base no publican nada: se alcanzan por
+# dentro, por las redes de abajo. Ojo en la VM: Docker publica puertos por fuera de UFW, así que abrir la
+# web a la red es una decisión del equipo (con ADR), no un cambio de una línea.
+name: medprotect
+
+services:
+  # PostgreSQL 17 endurecido de Docker (Docker Hardened Images): sin root, firmado y con lo mínimo.
+  # No es distroless como la API y la web: el arranque de PostgreSQL necesita un shell para crear la base.
+  # Ver docs/arquitectura/README.md.
+  db:
+    image: dhi.io/postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?falta POSTGRES_DB en .env}
+      POSTGRES_USER: ${POSTGRES_USER:?falta POSTGRES_USER en .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?falta POSTGRES_PASSWORD en .env}
+    volumes:
+      - datos-db:/var/lib/postgresql
+      # Corre solo la primera vez, con el volumen vacío. Para repetirlo: docker compose down -v (borra los datos).
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - interna
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  # Minimal API en .NET 10, distroless (chiseled): sin shell y sin root.
+  api:
+    build: ./webapi
+    image: medprotect-api:local
+    restart: unless-stopped
+    environment:
+      # GSS Encryption Mode=Disable: sin eso Npgsql busca Kerberos al conectar, y la imagen chiseled no lo trae.
+      ConnectionStrings__MedProtect: "Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};GSS Encryption Mode=Disable"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - interna
+      - frontal
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "dotnet", "MedProtect.Api.dll", "--healthcheck"]
+      interval: 15s
+      timeout: 5s
+      start_period: 10s
+      retries: 4
+
+  # Front estático con nginx distroless de Chainguard. Reenvía /api/ a la API.
+  web:
+    build: ./webclient
+    image: medprotect-web:local
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${WEB_PUERTO:-8080}:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - frontal
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/lib/nginx/tmp
+      - /var/run
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  # Sin salida a internet: aquí solo viven la base y la API.
+  interna:
+    internal: true
+  # Donde la web habla con la API.
+  frontal: {}
+
+volumes:
+  datos-db:
