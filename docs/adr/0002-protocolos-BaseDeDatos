@@ -12,7 +12,7 @@
 • Bloqueos y archivos corruptos. Si intentas guardar todo en archivos de texto plano, JSON o CSV dentro de tu servidor, cuando dos usuarios intenten guardar algo al mismo tiempo el archivo se puede dañar o la aplicación se volverá extremadamente lenta al crecer.
 • Búsquedas lentas e inseguras. Sin un motor de base de datos, filtrar información (como buscar un usuario por correo o sumar ventas del mes) requiere leer todos los datos desde cero cada vez, además de que quedas expuesto a fallos de seguridad básicos.
 • Pérdida total de datos al reiniciar. Si guardas la información en la memoria temporal del código (variables o arreglos en RAM), cada vez que actualices tu aplicación o se apague el servidor, todos los usuarios, pedidos o mensajes se borrarán para siempre.
-• Imposibilidad de compartir información entre usuarios. Si guardas los datos en el navegador del usuario (usando localStorage o cookies), cada persona solo verá su propia información y no podrá interactuar ni ver lo que publican otros.}
+• Imposibilidad de compartir información entre usuarios. Si guardas los datos en el navegador del usuario (usando localStorage o cookies), cada persona solo verá su propia información y no podrá interactuar ni ver lo que publican otros..}
 
 ## Opciones
 
