@@ -1,0 +1,44 @@
+# ADR-{0002}: {protocolos-BaseDeDatos}
+
+- **Estado:** {PROPUESTO_POR_ADR-Gerardo, juesus alberto, omar}
+- **Fecha:** {15-11-2026}
+- **Deciden:** {lalo} (Tech Lead) y {Omar} (responsable de Backend)
+- **Amenaza que atiende:** {ID_DE_LA_AMENAZA},
+
+## Contexto
+
+{Si no eliges ninguna base de datos, la aplicación no tendrá memoria a largo plazo y toda la información que generen los usuarios desaparecerá en cuanto cierren el programa o se reinicie el servidor.
+
+• Bloqueos y archivos corruptos. Si intentas guardar todo en archivos de texto plano, JSON o CSV dentro de tu servidor, cuando dos usuarios intenten guardar algo al mismo tiempo el archivo se puede dañar o la aplicación se volverá extremadamente lenta al crecer.
+• Búsquedas lentas e inseguras. Sin un motor de base de datos, filtrar información (como buscar un usuario por correo o sumar ventas del mes) requiere leer todos los datos desde cero cada vez, además de que quedas expuesto a fallos de seguridad básicos.
+• Pérdida total de datos al reiniciar. Si guardas la información en la memoria temporal del código (variables o arreglos en RAM), cada vez que actualices tu aplicación o se apague el servidor, todos los usuarios, pedidos o mensajes se borrarán para siempre.
+• Imposibilidad de compartir información entre usuarios. Si guardas los datos en el navegador del usuario (usando localStorage o cookies), cada persona solo verá su propia información y no podrá interactuar ni ver lo que publican otros.}
+
+## Opciones
+
+1. **{MariaDB}.** A favor: { Muy fácil de usar y configurar: Tiene una curva de aprendizaje muy suave y herramientas intuitivas para empezar rápido }. En contra: { Menor cumplimiento del estándar SQL: Algunas funciones avanzadas y tipos de datos complejos no están disponibles o funcionan de forma distinta al estándar oficial
+}.
+2. **{MongoDB}.** A favor: { Flexibilidad total de esquema: Guarda la información en documentos similares a JSON, permitiendo cambiar la estructura de los datos en cualquier momento sin detener la aplicación}. En contra: { Mayor consumo de almacenamiento: Al guardar los nombres de los campos dentro de cada documento y duplicar datos, ocupa mucho más espacio en disco}.
+
+## Decisión
+
+{Se va a empezar a usar postgreSQL por mejor uso y recomendación ya que es una base de datos y código abierto y potente y confiable}
+
+## Consecuencias
+
+- **A favor:** {Garantizamos consistencia estricta (ACID), evitamos costos de licencias y resolvemos necesidades relacionales y de documentos en un solo motor.}
+- **En contra:** {Mayor consumo de memoria RAM por conexión y una curva de mantenimiento más exigente a medida que crezca el volumen de datos.}
+- **Queda abierto:** {La gestión de picos altos de conexiones simultáneas. El **equipo de DevOps** deberá configurar un pool de conexiones (como PgBouncer) antes del lanzamiento a producción.}
+
+## Cumplimiento
+
+Cómo se comprueba que se sigue respetando, y cómo se ve fallar:
+
+```
+{COMANDO_O_PRUEBA}
+{SALIDA_QUE_DEMUESTRA_QUE_SE_CUMPLE}
+```
+
+---
+
+Un ADR no se edita para cambiar de opinión: se escribe otro que lo reemplaza, y este cambia su estado a "Reemplazado por ADR-XXXX".
