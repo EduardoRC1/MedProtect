@@ -82,7 +82,7 @@ Cuando construyan una ruta del SRS, cambien en el paso "Probar las rutas" el 501
 
 | Variable | Qué va | Ejemplo |
 |---|---|---|
-| `{FECHA}` | Fecha en formato AAAA-MM-DD | 2026-11-08 |
+| `{FECHA}` | Fecha en formato AAAA-MM-DD | 14/11/26 |
 | `{TECH_LEAD}`, `{RESPONSABLE_SEGURIDAD}`, `{DEVOPS}`, `{BACKEND}`, `{QA}`, `{PRODUCT_OWNER}` | Nombre y usuario de GitHub de quien tiene ese rol | Ana López (@analopez) |
 | `{INTEGRANTE}` | Quien hizo o verificó ese punto | @analopez |
 | `{NIVEL_ASVS}` | L1, L2 o L3 | L2 |
@@ -96,3 +96,11 @@ Cuando construyan una ruta del SRS, cambien en el paso "Probar las rutas" el 501
 | `{CUENTA_GITHUB}` | La cuenta dueña de MedProtect y del repositorio privado `despliegue` | analopez |
 | `{NOMBRE_RUNNER}` | Nombre único del runner de la VM | medprotect-vm |
 | `{VERSION_RUNNER}`, `{SUMA_RUNNER}` | Versión del runner y su SHA-256, de la página *New self-hosted runner* | 2.338.2 |
+| `{ID}` | Agregar un ID para el usuario | Ficha de datos |
+| `{NOMBRE}` | Agregar el nombre para el usuario | Ficha de datos |
+| `{GENERO}` | Agregar el genero del usuario | Ficha de datos |
+| `{FECHA DE NACIMIENTO}` | Agregar la fecha de nacimiento del usuario | medprotect-vm |
+`{DOMICILIO}` | Agregar el genero del usuario | Ficha de datos |
+`{ENFERMEDAD}` | Agregar que tipo de enfermedad tiene el usuario | Ficha de datos |
+`{SINTOMAS}` | Agregar los sintomas que padece el usuario | Ficha de datos |
+`
