@@ -1,39 +1,152 @@
+
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex">
-<title>MedProtect</title>
-<link rel="stylesheet" href="estilos.css">
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+
+    <title>MedProtect</title>
+    <link rel="stylesheet" href="estilos.css">
 </head>
+
 <body>
+
 <header>
-  <h1>MedProtect</h1>
-  <p>Alta de pacientes y mini historial clínico</p>
+    <h1>MedProtect</h1>
+    <p>Alta de pacientes y mini historial clínico</p>
 </header>
 
 <main>
-  <section aria-labelledby="estado-titulo">
-    <h2 id="estado-titulo">Estado del sistema</h2>
-    <p>API: <b id="estado-api">revisando</b></p>
-    <p>Base de datos: <b id="estado-db">revisando</b></p>
-  </section>
 
-  <section aria-labelledby="alta-titulo">
-    <h2 id="alta-titulo">Alta de paciente</h2>
-    <p class="pendiente">Por construir: RF-PAC-01 del SRS (<code>docs/srs/SRS.md</code>).</p>
-  </section>
+    <!-- ESTADO DEL SISTEMA -->
+    <section aria-labelledby="estado-titulo">
+        <h2 id="estado-titulo">Estado del sistema</h2>
 
-  <section aria-labelledby="historial-titulo">
-    <h2 id="historial-titulo">Historial clínico</h2>
-    <p class="pendiente">Por construir: RF-HIS-01 y RF-HIS-03 del SRS.</p>
-  </section>
+        <p>API:
+            <b id="estado-api">Sin comprobar</b>
+        </p>
+
+        <p>Base de datos:
+            <b id="estado-db">Sin comprobar</b>
+        </p>
+    </section>
+
+    <!-- ALTA DE PACIENTES -->
+    <section aria-labelledby="alta-titulo">
+        <h2 id="alta-titulo">Alta de paciente</h2>
+
+        <form id="form-paciente">
+
+            <label for="nombre">Nombre completo</label>
+            <input id="nombre" name="nombreCompleto"
+                   type="text" maxlength="150" required>
+
+            <label for="sexo">Sexo</label>
+            <select id="sexo" name="sexo">
+                <option value="">Seleccionar</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+                <option value="Otro">Otro</option>
+            </select>
+
+            <label for="fecha">Fecha de nacimiento</label>
+            <input id="fecha" name="fechaNacimiento"
+                   type="date">
+
+            <label for="telefono">Teléfono</label>
+            <input id="telefono" name="telefono"
+                   type="tel" maxlength="20">
+
+            <label for="direccion">Dirección</label>
+            <input id="direccion" name="direccion"
+                   type="text">
+
+            <label for="sangre">Tipo de sangre</label>
+            <select id="sangre" name="tipoSangre">
+                <option value="">Seleccionar</option>
+                <option>O+</option>
+                <option>O-</option>
+                <option>A+</option>
+                <option>A-</option>
+                <option>B+</option>
+                <option>B-</option>
+                <option>AB+</option>
+                <option>AB-</option>
+            </select>
+
+            <label for="alergias">Alergias</label>
+            <textarea id="alergias"
+                      name="alergias"></textarea>
+
+            <label for="creado">Registrado por</label>
+            <input id="creado" name="creadoPor"
+                   type="text" required>
+
+            <button type="submit">
+                Guardar paciente
+            </button>
+        </form>
+
+        <p id="mensaje-paciente" role="status"></p>
+    </section>
+
+    <!-- HISTORIAL CLÍNICO -->
+    <section aria-labelledby="historial-titulo">
+        <h2 id="historial-titulo">Historial clínico</h2>
+
+        <form id="form-historial">
+
+            <label for="paciente-id">
+                ID del paciente (UUID)
+            </label>
+            <input id="paciente-id"
+                   name="pacienteId"
+                   type="text" required>
+
+            <button type="button" id="buscar-paciente">
+                Consultar paciente
+            </button>
+
+            <p id="paciente-encontrado"
+               role="status"></p>
+
+            <label for="descripcion">
+                Descripción clínica
+            </label>
+            <textarea id="descripcion"
+                      name="descripcion"
+                      required></textarea>
+
+            <label for="escrita">
+                Registrado por
+            </label>
+            <input id="escrita"
+                   name="escritaPor"
+                   type="text" required>
+
+            <button type="submit">
+                Guardar entrada clínica
+            </button>
+        </form>
+
+        <p id="mensaje-historial" role="status"></p>
+
+        <h3>Entradas registradas</h3>
+        <ul id="lista-historial"></ul>
+    </section>
+
 </main>
 
 <footer>
-  <p>Datos ficticios. Material del curso de titulación DevSecOps.</p>
+    <p>
+        Datos ficticios.
+        Material del curso de titulación DevSecOps.
+    </p>
 </footer>
+
 <script src="app.js"></script>
+
 </body>
 </html>
