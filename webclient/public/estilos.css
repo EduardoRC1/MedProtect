@@ -1,45 +1,218 @@
+
+/* =========================================
+   MEDPROTECT - DISEÑO PRINCIPAL
+   ========================================= */
+
 :root {
-  --fondo: #f6f7f9;
-  --tarjeta: #ffffff;
-  --texto: #1b1f24;
-  --tenue: #5b6470;
-  --linea: #dde1e6;
-  --ok: #1a7f37;
-  --mal: #b42318;
-  --acento: #0b6bcb;
+    --primario: #1266c3;
+    --primario-hover: #0d4f99;
+    --fondo: #f1f5f9;
+    --tarjeta: #ffffff;
+    --texto: #172b4d;
+    --secundario: #64748b;
+    --borde: #dce4ed;
+    --exito: #087f5b;
+    --radio: 14px;
 }
 
-* { box-sizing: border-box; }
+* {
+    box-sizing: border-box;
+}
 
 body {
-  margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  background: var(--fondo);
-  color: var(--texto);
-  line-height: 1.5;
+    margin: 0;
+    background: var(--fondo);
+    color: var(--texto);
+    font-family: "Segoe UI", Arial, sans-serif;
+    line-height: 1.6;
 }
 
-header, main, footer {
-  max-width: 48rem;
-  margin: 0 auto;
-  padding: 1.25rem 1rem;
+/* ENCABEZADO */
+
+header {
+    background: linear-gradient(
+        120deg,
+        #0b4384,
+        #1266c3
+    );
+    color: white;
+    padding: 35px 24px;
+    text-align: center;
 }
 
-header h1 { margin: 0; color: var(--acento); }
-header p { margin: .25rem 0 0; color: var(--tenue); }
+header h1 {
+    margin: 0;
+    font-size: 2.3rem;
+    letter-spacing: 0.5px;
+}
+
+header p {
+    margin: 8px 0 0;
+    opacity: 0.9;
+}
+
+/* CONTENEDOR PRINCIPAL */
+
+main {
+    width: min(100% - 32px, 900px);
+    margin: 35px auto;
+}
 
 section {
-  background: var(--tarjeta);
-  border: 1px solid var(--linea);
-  border-radius: .6rem;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1rem;
+    background: var(--tarjeta);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 5px 20px rgba(15, 23, 42, 0.05);
 }
 
-section h2 { margin-top: 0; font-size: 1.15rem; }
+section h2 {
+    margin-top: 0;
+    margin-bottom: 22px;
+    font-size: 1.35rem;
+    color: #124b88;
+}
 
-.ok { color: var(--ok); }
-.mal { color: var(--mal); }
-.pendiente { color: var(--tenue); }
+/* FORMULARIOS */
 
-footer { color: var(--tenue); font-size: .9rem; }
+form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+input,
+select,
+textarea {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+    background: white;
+    color: var(--texto);
+    font: inherit;
+    transition: border-color 0.2s,
+                box-shadow 0.2s;
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primario);
+    box-shadow: 0 0 0 3px rgba(18, 102, 195, 0.13);
+}
+
+/* BOTONES */
+
+button {
+    background: var(--primario);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s,
+                transform 0.2s;
+}
+
+button:hover {
+    background: var(--primario-hover);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+button:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 3px;
+}
+
+/* ESTADO DEL SISTEMA */
+
+#estado-api,
+#estado-db {
+    font-weight: 700;
+    color: var(--exito);
+}
+
+/* MENSAJES */
+
+#mensaje-paciente,
+#mensaje-historial,
+#paciente-encontrado {
+    overflow-wrap: anywhere;
+    font-weight: 500;
+}
+
+/* HISTORIAL */
+
+#lista-historial {
+    padding-left: 20px;
+}
+
+#lista-historial li {
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #f8fafc;
+    border-left: 4px solid var(--primario);
+    border-radius: 6px;
+    overflow-wrap: anywhere;
+}
+
+/* PIE DE PÁGINA */
+
+footer {
+    padding: 25px 16px;
+    text-align: center;
+    color: var(--secundario);
+    font-size: 0.85rem;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 600px) {
+    main {
+        width: min(100% - 20px, 900px);
+        margin: 18px auto;
+    }
+
+    section {
+        padding: 18px;
+    }
+
+    header {
+        padding: 24px 16px;
+    }
+
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    button {
+        width: 100%;
+    }
+}
